@@ -261,7 +261,7 @@ let S = null, uid = 0;
 const sprites = new Map();
 let particles = [], popups = [], beams = [], shakeT = 0;
 let sel = null, hintsLeft = 3, hover = null, cursor = { c: 4, r: 6 }, keyMode = false;
-let busy = false, pendingCheck = false, lastT = 0, clock = 0;
+let busy = false, chaining = false, pendingCheck = false, lastT = 0, clock = 0;
 let best = 0;
 try { best = +localStorage.getItem('brickabrack-best') || 0; } catch (e) {}
 
@@ -436,14 +436,29 @@ function smash(c, r) {
   audioInit();
   if (cell.sp) {
     S.moves--;
-    const { kill, chain } = resolveSpecial(c, r);
-    const n = removeCells([...kill].map(k => k.split(',').map(Number)), true);
-    const pts = n * 20 * chain;
-    S.score += pts;
-    popup(c, r, '+' + pts + (chain > 1 ? '  ×' + chain : ''), true);
-    columnBonus(c, r);
-    S.smashes = (S.smashes || 0) + 1;
-    collapse(); updateHUD();
+    const { steps, chain } = resolveSpecial(c, r);
+    // Play the chain in order, one special every CHAIN_STEP_MS, so the payoff of a chain is visible.
+    chaining = true; busy = true; sel = null; hover = null; updateHUD();
+    let n = 0;
+    steps.forEach((st, i) => setTimeout(() => {
+      if (S.phase !== 'play') return;
+      beams.push({ sp: st.sp, c: st.c, r: st.r, life: 1, k: st.k });
+      if (st.sp === 'bomb') { shakeT = Math.max(shakeT, 0.4); sfx.boom(); }
+      else if (st.sp === 'prism') sfx.prism();
+      else sfx.zap();
+      n += removeCells(st.cells, true);
+      updateHUD();
+    }, i * CHAIN_STEP_MS));
+    setTimeout(() => {
+      chaining = false;
+      if (S.phase !== 'play') return;
+      const pts = n * 20 * chain;
+      S.score += pts;
+      popup(c, r, '+' + pts + (chain > 1 ? '  ×' + chain : ''), true);
+      columnBonus(c, r);
+      S.smashes = (S.smashes || 0) + 1;
+      collapse(); updateHUD();
+    }, (steps.length - 1) * CHAIN_STEP_MS + 120);
     return;
   }
   if (cell.iron) { cell.shake = 0.35; sfx.thud(); toast('Iron needs a smash next to it'); return; }
@@ -483,29 +498,27 @@ function smash(c, r) {
   collapse(); updateHUD();
 }
 
+// Work out a special's chain reaction as ordered steps: each special that fires, and the cells it newly clears.
 function resolveSpecial(c0, r0) {
-  const kill = new Set(), done = new Set(), q = [[c0, r0]];
-  let chain = 0;
+  const kill = new Set(), done = new Set(), q = [[c0, r0]], steps = [];
   while (q.length) {
     const [c, r] = q.shift(), key = c + ',' + r;
     if (done.has(key)) continue;
     done.add(key);
     const cell = get(c, r); if (!cell || !cell.sp) continue;
-    chain++;
-    kill.add(key);
-    const area = specialArea(cell.sp, c, r);
-    for (const [x, y] of area) {
+    const cells = [];
+    if (!kill.has(key)) { kill.add(key); cells.push([c, r]); }
+    for (const [x, y] of specialArea(cell.sp, c, r)) {
       const t = get(x, y); if (!t) continue;
-      kill.add(x + ',' + y);
-      if (t.sp && !done.has(x + ',' + y)) q.push([x, y]);
+      const k2 = x + ',' + y;
+      if (!kill.has(k2)) { kill.add(k2); cells.push([x, y]); }
+      if (t.sp && !done.has(k2)) q.push([x, y]);
     }
-    beams.push({ sp: cell.sp, c, r, life: 1, k: cell.sp === 'prism' ? mostCommonColor() : 0 });
-    if (cell.sp === 'bomb') { shakeT = Math.max(shakeT, 0.4); sfx.boom(); }
-    else if (cell.sp === 'prism') sfx.prism();
-    else sfx.zap();
+    steps.push({ sp: cell.sp, c, r, cells, k: cell.sp === 'prism' ? mostCommonColor() : 0 });
   }
-  return { kill, chain };
+  return { steps, chain: steps.length };
 }
+const CHAIN_STEP_MS = 200;
 
 function removeCells(list, big) {
   let n = 0;
@@ -902,7 +915,7 @@ function update(dt) {
     } else if (cell.y > r) { cell.y = r; cell.vy = 0; }
     if (cell.shake > 0) cell.shake = Math.max(0, cell.shake - dt);
   }
-  const wasBusy = busy; busy = moving;
+  const wasBusy = busy; busy = moving || chaining;
   if (wasBusy && !busy && pendingCheck) { pendingCheck = false; checkState(); }
   else if (wasBusy && !busy) refreshHover();
   const grav = cw * 22;
