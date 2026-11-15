@@ -110,15 +110,15 @@ canvas#board{display:block;touch-action:manipulation;cursor:pointer}
 .card .big{font:400 34px/1 var(--display);color:var(--ink);font-variant-numeric:tabular-nums}
 .card button{background:var(--accent);color:#1b1406;border-color:var(--accent);font-weight:700;padding:12px 16px;font-size:15px}
 .card button:hover{background:#ffc66e}
-.toast{position:fixed;z-index:60;left:50%;top:max(14px, env(safe-area-inset-top, 0px));transform:translate(-50%,-8px);opacity:0;pointer-events:none;background:var(--accent);color:#1b1406;font:400 14px/1 var(--display);padding:8px 12px;border-radius:6px;transition:opacity .2s, transform .2s;width:max-content;max-width:calc(100% - 24px);text-align:center;line-height:1.25}
-.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast{position:absolute;z-index:40;left:50%;top:50%;transform:translate(-50%,-50%) scale(.85);opacity:0;pointer-events:none;background:var(--accent);color:#1b1406;font:400 15px/1.25 var(--display);padding:10px 14px;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.45);transition:opacity .2s, transform .2s;width:max-content;max-width:calc(100% - 32px);text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
 .legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px}
 .legend div{display:flex;gap:10px;align-items:center;min-width:0}
 .legend canvas{flex:none;border-radius:4px}
 .legend p{margin:0;font-size:13px;line-height:1.35;color:var(--muted)}
 .legend p b{color:var(--ink);font-weight:500}
 .help b{color:var(--ink);font-weight:500}
-.help{margin:0;font-size:13px;color:var(--muted);line-height:1.5}
+.help{margin:0;padding-left:18px;font-size:13px;color:var(--muted);line-height:1.5;display:grid;gap:6px}
 h3{margin:4px 0 0;font:400 13px/1 var(--display);letter-spacing:.06em;color:var(--muted)}
 .howto{border:1px solid var(--line);border-radius:10px;background:var(--panel)}
 .howto summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;font:400 15px/1 var(--display);letter-spacing:.04em;color:var(--ink);border-radius:10px}
@@ -129,6 +129,33 @@ h3{margin:4px 0 0;font:400 13px/1 var(--display);letter-spacing:.06em;color:var(
 .howto-body{display:flex;flex-direction:column;gap:10px;padding:0 14px 14px}
 @media (max-width:420px){.legend{grid-template-columns:1fr}.hud{gap:6px}.stat{padding:7px 8px}}
 @media (max-height:520px){.card{padding:14px;gap:8px}.card h2{font-size:20px}.card .big{font-size:26px}.card p{font-size:14px;line-height:1.4}.card button{padding:10px 14px}}
+/* Level-up splash: plays over the board, then moves on by itself (tap to skip). */
+.levelup{position:absolute;inset:0;z-index:45;display:grid;place-content:center;justify-items:center;gap:6px;text-align:center;background:radial-gradient(circle at 50% 45%,rgba(16,21,32,.55),rgba(10,14,22,.86) 70%);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.levelup[hidden]{display:none}
+.lu-small{font:400 15px/1 var(--display);letter-spacing:.12em;color:var(--muted)}
+.lu-title{font:400 clamp(40px,13vw,64px)/.95 var(--display);color:var(--ink);text-shadow:0 4px 0 #0b0f17}
+.lu-stamp{font:400 clamp(22px,7vw,32px)/1 var(--display);color:#1b1406;background:var(--accent);padding:6px 14px 4px;border-radius:6px;transform:rotate(-4deg);box-shadow:0 6px 0 #9a5e0c}
+.lu-bonus{margin-top:12px;font:400 clamp(28px,9vw,40px)/1 var(--display);color:var(--accent);font-variant-numeric:tabular-nums}
+.lu-bonus small{display:block;margin-top:4px;font:500 12px/1 var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.lu-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;max-width:300px;margin-top:10px}
+.lu-chips span{font:500 13px/1 var(--body);color:var(--ink);background:rgba(255,255,255,.08);border:1px solid var(--line);padding:6px 10px;border-radius:999px}
+.lu-chips i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.lu-next{margin-top:14px;font:400 18px/1 var(--display);color:var(--ink)}
+.lu-next b{font-weight:400;color:var(--accent)}
+.lu-goal{font:500 14px/1.2 var(--body);color:var(--muted)}
+.levelup.go .lu-small{animation:luFade .3s both}
+.levelup.go .lu-title{animation:luSlam .45s cubic-bezier(.2,1.6,.4,1) both}
+.levelup.go .lu-stamp{animation:luStamp .4s .25s cubic-bezier(.2,1.8,.4,1) both}
+.levelup.go .lu-bonus{animation:luPop .35s .5s both}
+.levelup.go .lu-chips span{animation:luPop .3s both}
+.levelup.go .lu-next,.levelup.go .lu-goal{animation:luFade .35s 1.1s both}
+.levelup.out{animation:luOut .3s both}
+@keyframes luSlam{from{opacity:0;transform:scale(2.4)}to{opacity:1;transform:scale(1)}}
+@keyframes luStamp{from{opacity:0;transform:rotate(-20deg) scale(2)}to{opacity:1;transform:rotate(-4deg) scale(1)}}
+@keyframes luPop{from{opacity:0;transform:translateY(8px) scale(.6)}to{opacity:1;transform:none}}
+@keyframes luFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes luOut{to{opacity:0;transform:scale(1.08)}}
+@media (prefers-reduced-motion:reduce){.levelup.go *,.levelup.out{animation:none!important}}
 /* Portrait lock: phones and tablets held sideways get a rotate prompt; desktop windows are never blocked. */
 .rotate{display:none}
 @media (orientation:landscape) and (pointer:coarse) and (hover:none) and (max-height:600px){
@@ -174,7 +201,8 @@ h3{margin:4px 0 0;font:400 13px/1 var(--display);letter-spacing:.06em;color:var(
   <div class="frame">
     <div class="well" id="well">
       <canvas id="board" tabindex="0" aria-label="Brick board. Use arrow keys to move, Enter to smash."></canvas>
-      <div class="toast" id="toast"></div>
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+      <div class="levelup" id="levelup" hidden role="status" aria-live="polite"></div>
       <div class="overlay" id="overlay">
         <div class="card">
           <h2 id="oTitle">BrickedUp</h2>
@@ -189,7 +217,6 @@ h3{margin:4px 0 0;font:400 13px/1 var(--display);letter-spacing:.06em;color:var(
   <details class="howto">
     <summary>How To Play</summary>
     <div class="howto-body">
-  <p class="help">Tap a group of two or more touching bricks of the same color to highlight it, then tap it again to smash it. Tapping anywhere else moves the highlight. Bigger groups score far more (points grow with the square of the group). Specials go off with a single click and set off any other specials they hit. Each level gives you a set number of swings to clear the target. Empty a whole column in one swing for a <b>column clear</b> bonus of 250 × level per column. Smash past a level's target and some of the extra bricks count toward the next level: half of them after level 1, a little less each level after that (never below 10%), and never more than a quarter of the next target. So save a big group for your final swing. Up to 3 special bricks you haven't used carry over to the next level, dropped in at random spots. You get 3 hints per level, and a hint highlights the biggest group on the board.</p>
   <h3>Special bricks</h3>
   <div class="legend">
     <div><canvas data-icon="row" width="48" height="32"></canvas><p><b>Sweeper.</b> Clears its whole row. Made by smashing 6–8 bricks at once.</p></div>
@@ -198,6 +225,15 @@ h3{margin:4px 0 0;font:400 13px/1 var(--display);letter-spacing:.06em;color:var(
     <div><canvas data-icon="prism" width="48" height="32"></canvas><p><b>Prism.</b> Wipes every brick of the most common color. Smash 12 or more.</p></div>
     <div><canvas data-icon="iron" width="48" height="32"></canvas><p><b>Iron block.</b> From level 3. Can't be matched. Smash bricks next to it twice, or hit it with a special.</p></div>
   </div>
+  <h3>How it works</h3>
+  <ul class="help">
+    <li><b>Smash.</b> Tap a group of two or more touching bricks of the same color to highlight it, then tap it again to smash it. Tapping anywhere else moves the highlight. Specials go off with a single tap and set off any other specials they hit.</li>
+    <li><b>Score.</b> Bigger groups score far more, because points grow with the square of the group. Empty a whole column in one swing for a <b>column clear</b> bonus of 250 × level per column.</li>
+    <li><b>Levels.</b> Each level gives you a set number of swings to clear a brick target. Every swing you don't use is worth 25 × level. A new color joins at levels 4 and 7, and iron blocks show up from level 3.</li>
+    <li><b>Head start.</b> Smash past the target and some of the extra bricks count toward the next level: half after level 1, a little less each level (never below 10%), up to a quarter of the next target. Save a big group for your last swing.</li>
+    <li><b>Carry-over.</b> Up to 3 special bricks you haven't used come back on the next level in random spots.</li>
+    <li><b>Hints.</b> You get 3 per level. A hint highlights the biggest group on the board.</li>
+  </ul>
     </div>
   </details>
 </div>
@@ -297,6 +333,7 @@ try { if (screen.orientation && screen.orientation.lock) screen.orientation.lock
 
 /* ---------- game flow ---------- */
 function newGame() {
+  cancelSplash();
   S = { level: 1, score: 0, moves: 0, cleared: 0, target: 0, colors: 4, grid: [], phase: 'intro' };
   buildLevel(1);
   showOverlay('BrickedUp', null,
@@ -508,27 +545,69 @@ function checkState() {
 }
 function levelComplete() {
   S.phase = 'between';
-  const bonus = S.moves * 25 * S.level;
+  sel = null;
+  const done = S.level, swings = S.moves;
+  const bonus = swings * 25 * done;
   S.score += bonus; saveBest(); updateHUD();
   sfx.level();
-  const next = levelCfg(S.level + 1);
+  const next = levelCfg(done + 1);
   const carried = [];
   for (const col of S.grid) for (const cell of col) if (cell && cell.sp && carried.length < 3) carried.push(cell.sp);
   // Overflow: a share of the bricks cleared past the target becomes a head start on the next level.
   // The share is 50% after level 1 and drops 5 points a level to a 10% floor; the head start is capped at 25% of the next target.
   const overflow = Math.max(0, S.cleared - S.target);
-  const share = Math.max(10, 50 - 5 * (S.level - 1));
+  const share = Math.max(10, 50 - 5 * (done - 1));
   const headStart = Math.min(Math.round(overflow * share / 100), Math.floor(next.target * 0.25));
-  const extras = [];
-  if (headStart > 0) extras.push(`You smashed ${overflow} past the target, so <strong>${headStart} bricks</strong> (${share}%${headStart < Math.round(overflow * share / 100) ? ', capped' : ''}) count toward the next level.`);
-  if (carried.length) extras.push(`Your ${carried.length === 1 ? 'unused special brick carries' : carried.length + ' unused special bricks carry'} over to the next level.`);
-  if (next.colors > S.colors) extras.push(`A new color, ${PAL[next.colors - 1].name}, joins the yard.`);
-  if (S.level + 1 === 3) extras.push('Iron blocks show up from here on.');
-  showOverlay(`Level ${S.level} cleared`, '+' + bonus.toLocaleString(),
-    `Swing bonus for ${S.moves} unused swing${S.moves === 1 ? '' : 's'}. Next up: clear <strong>${next.target} bricks</strong> in <strong>${next.moves} swings</strong>. ${extras.join(' ')}`,
-    `Start level ${S.level + 1}`, () => { buildLevel(S.level + 1, carried, headStart); updateHUD(); track('level-' + S.level, 'Reached level ' + S.level); S.phase = 'play'; hideOverlay(); canvas.focus({ preventScroll: true }); const notes = []; if (headStart > 0) notes.push(`+${headStart} bricks head start`); if (carried.length) notes.push(`+${carried.length} special${carried.length === 1 ? '' : 's'} carried over`); if (notes.length) toast(notes.join(' · ')); });
+  const chips = [];
+  if (headStart > 0) chips.push(`+${headStart} head start`);
+  if (carried.length) chips.push(`+${carried.length} special${carried.length === 1 ? '' : 's'}`);
+  if (next.colors > S.colors) chips.push(`<i style="background:${PAL[next.colors - 1].base}"></i>New color`);
+  if (done + 1 === 3) chips.push('Iron blocks incoming');
+  levelSplash(done, bonus, chips, next, () => {
+    if (S.phase !== 'between') return;
+    buildLevel(done + 1, carried, headStart); updateHUD();
+    track('level-' + S.level, 'Reached level ' + S.level);
+    S.phase = 'play'; canvas.focus({ preventScroll: true });
+  });
+}
+let splashTimers = [];
+function cancelSplash() { splashTimers.forEach(clearTimeout); splashTimers = []; const el = $('levelup'); if (el) { el.hidden = true; el.onclick = null; el.className = 'levelup'; } }
+function levelSplash(done, bonus, chips, next, onDone) {
+  const el = $('levelup');
+  el.innerHTML = `<div class="lu-small">Level ${done}</div><div class="lu-title">Cleared!</div>` +
+    (bonus ? `<div class="lu-bonus"><span id="luNum">+0</span><small>swing bonus</small></div>` : '') +
+    (chips.length ? `<div class="lu-chips">${chips.map((c, i) => `<span style="animation-delay:${0.75 + i * 0.12}s">${c}</span>`).join('')}</div>` : '') +
+    `<div class="lu-next">Level <b>${done + 1}</b></div><div class="lu-goal">${next.target} bricks · ${next.moves} swings</div>`;
+  el.className = 'levelup'; el.hidden = false; void el.offsetWidth; el.classList.add('go');
+  splashTimers.forEach(clearTimeout); splashTimers = [];
+  // count the bonus up
+  const num = $('luNum');
+  if (num) {
+    const t0 = performance.now() + 500, dur = 600;
+    const step = now => { const k = Math.max(0, Math.min(1, (now - t0) / dur)); num.textContent = '+' + Math.round(bonus * k).toLocaleString(); if (k < 1 && !el.hidden) requestAnimationFrame(step); };
+    requestAnimationFrame(step);
+    if (reduceMotion) num.textContent = '+' + bonus.toLocaleString();
+  }
+  // confetti of brick chips across the board
+  if (!reduceMotion) for (let i = 0; i < 6; i++) splashTimers.push(setTimeout(() => {
+    const c = Math.floor(Math.random() * COLS), r = Math.floor(Math.random() * ROWS * 0.7);
+    burst(c, r, { k: Math.floor(Math.random() * S.colors), sp: null }, false);
+  }, 150 + i * 140));
+  let finished = false;
+  const finish = () => {
+    if (finished) return; finished = true;
+    splashTimers.forEach(clearTimeout); splashTimers = [];
+    el.onclick = null;
+    el.classList.remove('go'); el.classList.add('out');
+    setTimeout(() => { el.hidden = true; el.className = 'levelup'; }, reduceMotion ? 0 : 280);
+    onDone();
+  };
+  splashTimers.push(setTimeout(finish, 2900));
+  // tap to skip, once the headline has landed
+  setTimeout(() => { if (!finished) el.onclick = finish; }, 500);
 }
 function gameOver(reason) {
+  cancelSplash();
   S.phase = 'over';
   track('game-over-level-' + S.level, 'Game over on level ' + S.level);
   const isBest = S.score > best;
