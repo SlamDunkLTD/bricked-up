@@ -17,12 +17,13 @@ You don't have to make everything. Replace any subset, and anything you skip kee
 - **Use PNG only for raster art** such as painted textures, photos or soft glows. Export it at **3x** the listed size with a transparent background. A 2x version is optional; Claude can downscale.
 - **Use RGB color, not CMYK.** Work in Illustrator's RGB document mode at 72 ppi, so 1 px equals 1 pt.
 - **Each artboard is exactly the listed size.** Leave no stray objects outside the artboard. Illustrator's "Use Artboards" export option handles this.
-- **Brick aspect ratio:** every board cell is **5 : 4** (width : height). On screen, a cell is about 24 to 58 px wide depending on the device, so art has to read clearly at small sizes. Test it by zooming out until the brick is about 30 px wide.
+- **Brick aspect ratio:** every board cell is **3 : 2** (width : height). On screen, a cell is about 40 to 84 px wide depending on the device, so art has to read clearly at small sizes. Test it by zooming out until the brick is about 45 px wide, which is its size on a typical phone.
+- **Board:** 7 columns × 11 rows, so the whole board is 21 : 22, almost square.
 - **Background behind bricks:** the board behind the bricks is near-black (`#0e131d`), and bricks sit edge to edge with no gap. The current art leaves a 2 px inset inside each cell so bricks look separate. Keep that inset, or a visible edge, in your art.
 
 ## 1. Bricks (the core art)
 
-Artboard **160 × 128 px** (5 : 4), SVG.
+Artboard **150 × 100 px** (3 : 2), SVG.
 
 There are 6 colors. Levels 1 to 3 use the first 4, a 5th arrives at level 4 and a 6th at level 7. Each color also carries a small **shape glyph** so color-blind players can tell them apart. Please keep a distinct shape on each color. You can redesign the shapes, but each color needs one, and no two can look alike.
 
@@ -41,7 +42,7 @@ There are 6 colors. Levels 1 to 3 use the first 4, a 5th arrives at level 4 and 
 
 ## 2. Special bricks
 
-Artboard **160 × 128 px**, SVG. These need to stand out clearly from the 6 colored bricks. Right now they share a dark gunmetal body with a bright icon.
+Artboard **150 × 100 px**, SVG. These need to stand out clearly from the 6 colored bricks. Right now they share a dark gunmetal body with a bright icon.
 
 | File | What it does | Current look |
 |---|---|---|
@@ -52,7 +53,7 @@ Artboard **160 × 128 px**, SVG. These need to stand out clearly from the 6 colo
 
 ## 3. Iron blocks
 
-Artboard **160 × 128 px**, SVG. They appear from level 3. An iron block takes two hits, so it has two states.
+Artboard **150 × 100 px**, SVG. They appear from level 3. An iron block takes two hits, so it has two states.
 
 | File | State |
 |---|---|
@@ -70,7 +71,7 @@ These are currently drawn in code as outlines and tints, which keeps them crisp 
 | Selected special outline | coral `#ff7a5c` |
 | Keyboard cursor | dashed amber box |
 
-If you'd rather draw an overlay that sits on top of each selected brick, make `skin/fx/select-overlay.svg` at 160 × 128 px, mostly transparent.
+If you'd rather draw an overlay that sits on top of each selected brick, make `skin/fx/select-overlay.svg` at 150 × 100 px, mostly transparent.
 
 ## 5. Effects
 
@@ -87,7 +88,7 @@ Points pop-ups ("+125") and the "tap again" tag are text, set in the display fon
 | File | Size | Format | Notes |
 |---|---|---|---|
 | `skin/board/frame.svg` | 620 × 620 px, 9-slice | SVG | The frame around the board, currently amber and black hazard stripes. It has to stretch to the board's height, so keep the **outer 24 px on each side** as the border and leave the middle plain. Claude slices it at 24 px. |
-| `skin/board/board-bg.png` | 600 × 720 px | PNG 3x | Optional texture behind the bricks, currently flat near-black. Keep it dark and low-contrast. |
+| `skin/board/board-bg.png` | 600 × 630 px | PNG 3x | Optional texture behind the bricks, currently flat near-black. Keep it dark and low-contrast. |
 | `skin/page/page-bg.png` | 1600 × 1200 px | PNG 2x | Optional page background, currently a dark navy radial glow. It's cropped to fill the screen, so keep the interest in the middle third. |
 
 ## 7. Logo and wordmark
