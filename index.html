@@ -95,6 +95,13 @@ canvas#board{display:block;touch-action:manipulation;cursor:pointer}
 .help b{color:var(--ink);font-weight:500}
 .help{margin:0;font-size:13px;color:var(--muted);line-height:1.5}
 h3{margin:4px 0 0;font:400 13px/1 var(--display);letter-spacing:.06em;color:var(--muted)}
+.howto{border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+.howto summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;font:400 15px/1 var(--display);letter-spacing:.04em;color:var(--ink);border-radius:10px}
+.howto summary::-webkit-details-marker{display:none}
+.howto summary::after{content:'+';font:700 20px/1 var(--body);color:var(--accent)}
+.howto[open] summary::after{content:'\2212'}
+.howto summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.howto-body{display:flex;flex-direction:column;gap:10px;padding:0 14px 14px}
 @media (max-width:420px){.legend{grid-template-columns:1fr}.hud{gap:6px}.stat{padding:7px 8px}}
 @media (prefers-reduced-motion:reduce){.bar i,.toast{transition:none}}
 </style>
@@ -137,6 +144,10 @@ h3{margin:4px 0 0;font:400 13px/1 var(--display);letter-spacing:.06em;color:var(
     </div>
   </div>
 
+  <details class="howto">
+    <summary>How To Play</summary>
+    <div class="howto-body">
+  <p class="help">Tap a group of two or more touching bricks of the same color to highlight it, then tap it again to smash it. Tapping anywhere else moves the highlight. Bigger groups score far more (points grow with the square of the group). Specials go off with a single click and set off any other specials they hit. Each level gives you a set number of swings to clear the target. Empty a whole column in one swing for a <b>column clear</b> bonus of 250 × level per column. You get 3 hints per level, and a hint highlights the biggest group on the board.</p>
   <h3>Special bricks</h3>
   <div class="legend">
     <div><canvas data-icon="row" width="44" height="35"></canvas><p><b>Sweeper.</b> Clears its whole row. Made by smashing 6–8 bricks at once.</p></div>
@@ -145,7 +156,8 @@ h3{margin:4px 0 0;font:400 13px/1 var(--display);letter-spacing:.06em;color:var(
     <div><canvas data-icon="prism" width="44" height="35"></canvas><p><b>Prism.</b> Wipes every brick of the most common color. Smash 12 or more.</p></div>
     <div><canvas data-icon="iron" width="44" height="35"></canvas><p><b>Iron block.</b> From level 3. Can't be matched. Smash bricks next to it twice, or hit it with a special.</p></div>
   </div>
-  <p class="help">Tap a group of two or more touching bricks of the same color to highlight it, then tap it again to smash it. Tapping anywhere else moves the highlight. Bigger groups score far more (points grow with the square of the group). Specials go off with a single click and set off any other specials they hit. Each level gives you a set number of swings to clear the target. Empty a whole column in one swing for a <b>column clear</b> bonus of 250 × level per column. You get 3 hints per level, and a hint highlights the biggest group on the board.</p>
+    </div>
+  </details>
 </div>
 
 <script>
