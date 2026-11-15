@@ -110,7 +110,7 @@ canvas#board{display:block;touch-action:manipulation;cursor:pointer}
 .card .big{font:400 34px/1 var(--display);color:var(--ink);font-variant-numeric:tabular-nums}
 .card button{background:var(--accent);color:#1b1406;border-color:var(--accent);font-weight:700;padding:12px 16px;font-size:15px}
 .card button:hover{background:#ffc66e}
-.toast{position:absolute;left:50%;top:14px;transform:translate(-50%,-8px);opacity:0;pointer-events:none;background:var(--accent);color:#1b1406;font:400 14px/1 var(--display);padding:8px 12px;border-radius:6px;transition:opacity .2s, transform .2s;white-space:nowrap}
+.toast{position:absolute;left:50%;top:14px;transform:translate(-50%,-8px);opacity:0;pointer-events:none;background:var(--accent);color:#1b1406;font:400 14px/1 var(--display);padding:8px 12px;border-radius:6px;transition:opacity .2s, transform .2s;width:max-content;max-width:calc(100% - 24px);text-align:center;line-height:1.25}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 .legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px}
 .legend div{display:flex;gap:10px;align-items:center;min-width:0}
@@ -172,7 +172,7 @@ h3{margin:4px 0 0;font:400 13px/1 var(--display);letter-spacing:.06em;color:var(
   <details class="howto">
     <summary>How To Play</summary>
     <div class="howto-body">
-  <p class="help">Tap a group of two or more touching bricks of the same color to highlight it, then tap it again to smash it. Tapping anywhere else moves the highlight. Bigger groups score far more (points grow with the square of the group). Specials go off with a single click and set off any other specials they hit. Each level gives you a set number of swings to clear the target. Empty a whole column in one swing for a <b>column clear</b> bonus of 250 × level per column. Up to 3 special bricks you haven't used carry over to the next level, dropped in at random spots. You get 3 hints per level, and a hint highlights the biggest group on the board.</p>
+  <p class="help">Tap a group of two or more touching bricks of the same color to highlight it, then tap it again to smash it. Tapping anywhere else moves the highlight. Bigger groups score far more (points grow with the square of the group). Specials go off with a single click and set off any other specials they hit. Each level gives you a set number of swings to clear the target. Empty a whole column in one swing for a <b>column clear</b> bonus of 250 × level per column. Smash past a level's target and some of the extra bricks count toward the next level: half of them after level 1, a little less each level after that (never below 10%), and never more than a quarter of the next target. So save a big group for your final swing. Up to 3 special bricks you haven't used carry over to the next level, dropped in at random spots. You get 3 hints per level, and a hint highlights the biggest group on the board.</p>
   <h3>Special bricks</h3>
   <div class="legend">
     <div><canvas data-icon="row" width="48" height="32"></canvas><p><b>Sweeper.</b> Clears its whole row. Made by smashing 6–8 bricks at once.</p></div>
@@ -283,9 +283,9 @@ function newGame() {
     `Tap a group of two or more matching bricks to highlight it, then tap again to smash. Clear <strong>${S.target} bricks</strong> in <strong>${S.moves} swings</strong> to reach level 2.`,
     'Start level 1', () => { track('game-start', 'Game started'); S.phase = 'play'; hideOverlay(); canvas.focus({ preventScroll: true }); });
 }
-function buildLevel(L, carried = []) {
+function buildLevel(L, carried = [], headStart = 0) {
   const cfg = levelCfg(L);
-  Object.assign(S, { level: L, colors: cfg.colors, target: cfg.target, moves: cfg.moves, cleared: 0 });
+  Object.assign(S, { level: L, colors: cfg.colors, target: cfg.target, moves: cfg.moves, cleared: headStart });
   S.grid = [];
   for (let c = 0; c < COLS; c++) {
     S.grid.push([]);
@@ -494,13 +494,19 @@ function levelComplete() {
   const next = levelCfg(S.level + 1);
   const carried = [];
   for (const col of S.grid) for (const cell of col) if (cell && cell.sp && carried.length < 3) carried.push(cell.sp);
+  // Overflow: a share of the bricks cleared past the target becomes a head start on the next level.
+  // The share is 50% after level 1 and drops 5 points a level to a 10% floor; the head start is capped at 25% of the next target.
+  const overflow = Math.max(0, S.cleared - S.target);
+  const share = Math.max(10, 50 - 5 * (S.level - 1));
+  const headStart = Math.min(Math.round(overflow * share / 100), Math.floor(next.target * 0.25));
   const extras = [];
+  if (headStart > 0) extras.push(`You smashed ${overflow} past the target, so <strong>${headStart} bricks</strong> (${share}%${headStart < Math.round(overflow * share / 100) ? ', capped' : ''}) count toward the next level.`);
   if (carried.length) extras.push(`Your ${carried.length === 1 ? 'unused special brick carries' : carried.length + ' unused special bricks carry'} over to the next level.`);
   if (next.colors > S.colors) extras.push(`A new color, ${PAL[next.colors - 1].name}, joins the yard.`);
   if (S.level + 1 === 3) extras.push('Iron blocks show up from here on.');
   showOverlay(`Level ${S.level} cleared`, '+' + bonus.toLocaleString(),
     `Swing bonus for ${S.moves} unused swing${S.moves === 1 ? '' : 's'}. Next up: clear <strong>${next.target} bricks</strong> in <strong>${next.moves} swings</strong>. ${extras.join(' ')}`,
-    `Start level ${S.level + 1}`, () => { buildLevel(S.level + 1, carried); track('level-' + S.level, 'Reached level ' + S.level); S.phase = 'play'; hideOverlay(); canvas.focus({ preventScroll: true }); if (carried.length) toast(`+${carried.length} special${carried.length === 1 ? '' : 's'} carried over`); });
+    `Start level ${S.level + 1}`, () => { buildLevel(S.level + 1, carried, headStart); updateHUD(); track('level-' + S.level, 'Reached level ' + S.level); S.phase = 'play'; hideOverlay(); canvas.focus({ preventScroll: true }); const notes = []; if (headStart > 0) notes.push(`+${headStart} bricks head start`); if (carried.length) notes.push(`+${carried.length} special${carried.length === 1 ? '' : 's'} carried over`); if (notes.length) toast(notes.join(' · ')); });
 }
 function gameOver(reason) {
   S.phase = 'over';
