@@ -11,11 +11,7 @@
 <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <link rel="manifest" href="/manifest.webmanifest">
-<script>
-  // Shared Slam Dunk Studio GoatCounter account: keep BrickedUp page views under their own prefix.
-  window.goatcounter = { path: function (p) { return '/brickedup' + p; } };
-</script>
-<script data-goatcounter="https://slamdunkstudio.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+<script data-goatcounter="https://brickedup.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="BrickedUp">
@@ -276,7 +272,7 @@ function specialArea(sp, c, r) {
 
 /* ---------- analytics (GoatCounter, cookie-free; no-op when blocked or offline) ---------- */
 function track(path, title) {
-  try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: 'brickedup/' + path, title: 'BrickedUp: ' + (title || path), event: true }); } catch (e) {}
+  try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: path, title: title || path, event: true }); } catch (e) {}
 }
 
 /* ---------- game flow ---------- */
