@@ -1,4 +1,4 @@
-# Brick-A-Brack
+# BrickedUp
 
 A collapse-style brick smashing game. Tap a group of two or more matching bricks to clear them, chain big groups, use special bricks, and hit each level's brick target before you run out of swings.
 

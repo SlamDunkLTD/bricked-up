@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Brick-A-Brack</title>
+<title>BrickedUp</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Rubik:wght@400;500;700&display=swap">
@@ -102,7 +102,7 @@ h3{margin:4px 0 0;font:400 13px/1 var(--display);letter-spacing:.06em;color:var(
 <body>
 <div class="wrap">
   <header>
-    <h1 class="logo"><span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>Brick-A-<span class="a">Brack</span></span></h1>
+    <h1 class="logo"><span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>Bricked<span class="a">Up</span></span></h1>
     <div class="controls">
       <button id="soundBtn" type="button" aria-pressed="true">Sound on</button>
       <button id="hintBtn" type="button">Hint (3)</button>
@@ -128,7 +128,7 @@ h3{margin:4px 0 0;font:400 13px/1 var(--display);letter-spacing:.06em;color:var(
       <div class="toast" id="toast"></div>
       <div class="overlay" id="overlay">
         <div class="card">
-          <h2 id="oTitle">Brick-A-Brack</h2>
+          <h2 id="oTitle">BrickedUp</h2>
           <div class="big" id="oBig" hidden></div>
           <p id="oText"></p>
           <button id="oBtn" type="button">Start</button>
@@ -237,7 +237,7 @@ function specialArea(sp, c, r) {
 function newGame() {
   S = { level: 1, score: 0, moves: 0, cleared: 0, target: 0, colors: 4, grid: [], phase: 'intro' };
   buildLevel(1);
-  showOverlay('Brick-A-Brack', null,
+  showOverlay('BrickedUp', null,
     `Tap a group of two or more matching bricks to highlight it, then tap again to smash. Clear <strong>${S.target} bricks</strong> in <strong>${S.moves} swings</strong> to reach level 2.`,
     'Start level 1', () => { S.phase = 'play'; hideOverlay(); canvas.focus({ preventScroll: true }); });
 }
