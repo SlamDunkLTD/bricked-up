@@ -129,10 +129,26 @@ h3{margin:4px 0 0;font:400 13px/1 var(--display);letter-spacing:.06em;color:var(
 .howto-body{display:flex;flex-direction:column;gap:10px;padding:0 14px 14px}
 @media (max-width:420px){.legend{grid-template-columns:1fr}.hud{gap:6px}.stat{padding:7px 8px}}
 @media (max-height:520px){.card{padding:14px;gap:8px}.card h2{font-size:20px}.card .big{font-size:26px}.card p{font-size:14px;line-height:1.4}.card button{padding:10px 14px}}
+/* Portrait lock: phones and tablets held sideways get a rotate prompt; desktop windows are never blocked. */
+.rotate{display:none}
+@media (orientation:landscape) and (pointer:coarse) and (hover:none) and (max-height:600px){
+  .rotate{display:grid;position:fixed;inset:0;z-index:100;place-content:center;justify-items:center;gap:18px;padding:24px;text-align:center;background:var(--bg);color:var(--ink)}
+  .rotate p{margin:0;font:400 20px/1.2 var(--display);letter-spacing:.03em}
+  .rotate span{color:var(--muted);font-size:14px}
+  .rotate svg{width:72px;height:72px;animation:tilt 2.4s ease-in-out infinite}
+  body{overflow:hidden}
+}
+@keyframes tilt{0%,30%{transform:rotate(-90deg)}60%,100%{transform:rotate(0)}}
+@media (prefers-reduced-motion:reduce){.rotate svg{animation:none}}
 @media (prefers-reduced-motion:reduce){.bar i,.toast{transition:none}}
 </style>
 </head>
 <body>
+<div class="rotate" role="alert" aria-live="assertive">
+  <svg viewBox="0 0 64 64" aria-hidden="true"><rect x="18" y="6" width="28" height="52" rx="5" fill="none" stroke="#ffb547" stroke-width="4"/><rect x="27" y="50" width="10" height="3" rx="1.5" fill="#ffb547"/></svg>
+  <p>Rotate your phone</p>
+  <span>BrickedUp plays upright.</span>
+</div>
 <div class="wrap">
   <header>
     <h1 class="logo"><span class="logo-mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>Bricked<span class="a">Up</span></span></h1>
@@ -275,6 +291,9 @@ function specialArea(sp, c, r) {
 function track(path, title) {
   try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path: path, title: title || path, event: true }); } catch (e) {}
 }
+
+/* ---------- portrait lock (works where allowed, e.g. home-screen installs on Android) ---------- */
+try { if (screen.orientation && screen.orientation.lock) screen.orientation.lock('portrait').catch(() => {}); } catch (e) {}
 
 /* ---------- game flow ---------- */
 function newGame() {
