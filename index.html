@@ -6,7 +6,7 @@
 <title>BrickedUp</title>
 <meta name="description" content="Smash matching bricks, chain big groups and clear the yard. A free brick-smashing puzzle game.">
 <meta name="theme-color" content="#161d2b">
-<meta name="build" content="2026-11-15.1">
+<meta name="build" content="2026-11-15.2">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" href="/icons/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
@@ -130,6 +130,13 @@ h3{margin:4px 0 0;font:400 13px/1 var(--display);letter-spacing:.06em;color:var(
 .howto-body{display:flex;flex-direction:column;gap:10px;padding:0 14px 14px}
 @media (max-width:420px){.legend{grid-template-columns:1fr}.hud{gap:6px}.stat{padding:7px 8px}}
 @media (max-height:520px){.card{padding:14px;gap:8px}.card h2{font-size:20px}.card .big{font-size:26px}.card p{font-size:14px;line-height:1.4}.card button{padding:10px 14px}}
+/* Chain pop: counts up in the middle of the board as each special in a chain fires. */
+.chainpop{position:absolute;z-index:42;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none;opacity:0;font:400 clamp(30px,10vw,48px)/1 var(--display);color:#1b1406;background:var(--accent);padding:10px 18px 6px;border-radius:8px;box-shadow:0 6px 0 #9a5e0c,0 14px 30px rgba(0,0,0,.45);white-space:nowrap}
+.chainpop.hit{animation:chainHit .38s cubic-bezier(.2,1.8,.4,1) both}
+.chainpop.out{animation:chainOut .35s both}
+@keyframes chainHit{from{opacity:0;transform:translate(-50%,-50%) rotate(-8deg) scale(1.9)}to{opacity:1;transform:translate(-50%,-50%) rotate(-3deg) scale(1)}}
+@keyframes chainOut{from{opacity:1;transform:translate(-50%,-50%) rotate(-3deg) scale(1)}to{opacity:0;transform:translate(-50%,-60%) rotate(-3deg) scale(.9)}}
+@media (prefers-reduced-motion:reduce){.chainpop.hit,.chainpop.out{animation:none;opacity:1}.chainpop.out{opacity:0}}
 /* Level-up splash: plays over the board, then moves on by itself (tap to skip). */
 .levelup{position:absolute;inset:0;z-index:45;display:grid;place-content:center;justify-items:center;gap:6px;text-align:center;background:radial-gradient(circle at 50% 45%,rgba(16,21,32,.55),rgba(10,14,22,.86) 70%);cursor:pointer;-webkit-tap-highlight-color:transparent}
 .levelup[hidden]{display:none}
@@ -203,6 +210,7 @@ h3{margin:4px 0 0;font:400 13px/1 var(--display);letter-spacing:.06em;color:var(
     <div class="well" id="well">
       <canvas id="board" tabindex="0" aria-label="Brick board. Use arrow keys to move, Enter to smash."></canvas>
       <div class="toast" id="toast" role="status" aria-live="polite"></div>
+      <div class="chainpop" id="chainpop" aria-live="polite"></div>
       <div class="levelup" id="levelup" hidden role="status" aria-live="polite"></div>
       <div class="overlay" id="overlay">
         <div class="card">
@@ -228,7 +236,8 @@ h3{margin:4px 0 0;font:400 13px/1 var(--display);letter-spacing:.06em;color:var(
   </div>
   <h3>How it works</h3>
   <ul class="help">
-    <li><b>Smash.</b> Tap a group of two or more touching bricks of the same color to highlight it, then tap it again to smash it. Tapping anywhere else moves the highlight. Specials go off with a single tap and set off any other specials they hit.</li>
+    <li><b>Smash.</b> Tap a group of two or more touching bricks of the same color to highlight it, then tap it again to smash it. Tapping anywhere else moves the highlight. Specials go off with a single tap.</li>
+    <li><b>Chains.</b> When a special's blast reaches another special, that one goes off too, and so on down the line. Every special in the chain adds to a multiplier, so three specials in a row score each brick they clear at ×3.</li>
     <li><b>Score.</b> Bigger groups score far more, because points grow with the square of the group. Empty a whole column in one swing for a <b>column clear</b> bonus of 250 × level per column.</li>
     <li><b>Levels.</b> Each level gives you a set number of swings to clear a brick target. Every swing you don't use is worth 25 × level. A new color joins at levels 4 and 7, and iron blocks show up from level 3.</li>
     <li><b>Head start.</b> Smash past the target and some of the extra bricks count toward the next level: half after level 1, a little less each level (never below 10%), up to a quarter of the next target. Save a big group for your last swing.</li>
@@ -478,8 +487,10 @@ function smash(c, r) {
       else if (st.sp === 'prism') sfx.prism();
       else sfx.zap();
       n += removeCells(st.cells, true);
+      if (i > 0) chainPop(i + 1);
       updateHUD();
     }, i * CHAIN_STEP_MS));
+    if (steps.length > 1) setTimeout(chainPopOut, (steps.length - 1) * CHAIN_STEP_MS + 650);
     setTimeout(() => {
       chaining = false;
       if (S.phase !== 'play') return;
@@ -550,6 +561,12 @@ function resolveSpecial(c0, r0) {
   return { steps, chain: steps.length };
 }
 const CHAIN_STEP_MS = 400;
+function chainPop(n) {
+  const el = $('chainpop');
+  el.textContent = 'Chain ×' + n;
+  el.classList.remove('hit', 'out'); void el.offsetWidth; el.classList.add('hit');
+}
+function chainPopOut() { const el = $('chainpop'); if (el.classList.contains('hit')) { el.classList.remove('hit'); el.classList.add('out'); } }
 
 function removeCells(list, big) {
   let n = 0;
