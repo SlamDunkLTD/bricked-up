@@ -6,6 +6,7 @@
 <title>BrickedUp</title>
 <meta name="description" content="Smash matching bricks, chain big groups and clear the yard. A free brick-smashing puzzle game.">
 <meta name="theme-color" content="#161d2b">
+<meta name="build" content="2026-11-15.1">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" href="/icons/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
@@ -331,6 +332,36 @@ function track(path, title) {
 /* ---------- portrait lock (works where allowed, e.g. home-screen installs on Android) ---------- */
 try { if (screen.orientation && screen.orientation.lock) screen.orientation.lock('portrait').catch(() => {}); } catch (e) {}
 
+/* ---------- update check ----------
+   A home-screen install on iOS can keep showing an old copy (it resumes a saved page, and GitHub Pages
+   lets browsers cache the HTML for 10 minutes). On launch and whenever the app comes back to the
+   foreground, ask the server for the latest build stamp, skipping every cache, and reload onto it if it
+   changed. Never interrupts a game in progress. Bump <meta name="build"> on every change to this file. */
+const BUILD = (document.querySelector('meta[name="build"]') || {}).content || '';
+let updateReady = null;
+async function checkForUpdate() {
+  if (!BUILD || !/^https?:/.test(location.protocol) || !navigator.onLine) return;
+  try {
+    const res = await fetch('/?check=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) return;
+    const m = (await res.text()).match(/<meta name="build" content="([^"]+)"/);
+    if (m && m[1] !== BUILD) { updateReady = m[1]; applyUpdate(); }
+  } catch (e) {}
+}
+function applyUpdate() {
+  if (!updateReady) return;
+  const midGame = S && S.phase !== 'intro' && S.phase !== 'over' && ((S.smashes || 0) > 0 || S.level > 1);
+  if (midGame) return; // try again at game over or next launch
+  let tried = null; try { tried = sessionStorage.getItem('bu-update'); } catch (e) {}
+  if (tried === updateReady) return; // already reloaded for this build once; don't loop
+  try { sessionStorage.setItem('bu-update', updateReady); } catch (e) {}
+  location.replace('/?v=' + encodeURIComponent(updateReady)); // new URL skips any cached copy
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) checkForUpdate(); });
+window.addEventListener('pageshow', e => { if (e.persisted) checkForUpdate(); });
+setTimeout(checkForUpdate, 1500);
+if (/[?&]v=/.test(location.search)) { try { history.replaceState(null, '', '/'); } catch (e) {} }
+
 /* ---------- game flow ---------- */
 function newGame() {
   cancelSplash();
@@ -628,7 +659,7 @@ function gameOver(reason) {
   sfx.over();
   showOverlay(reason, S.score.toLocaleString(),
     `You reached <strong>level ${S.level}</strong>${isBest && S.score > 0 ? ' and set a new best score' : ''}. Best so far: <strong>${best.toLocaleString()}</strong>.`,
-    'Play again', () => { newGame(); track('game-start', 'Game started'); S.phase = 'play'; hideOverlay(); });
+    'Play again', () => { if (updateReady) { applyUpdate(); } newGame(); track('game-start', 'Game started'); S.phase = 'play'; hideOverlay(); });
 }
 function saveBest() { if (S.score > best) { best = S.score; try { localStorage.setItem('brickabrack-best', String(best)); } catch (e) {} } }
 
