@@ -11,6 +11,7 @@
 <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
 <link rel="manifest" href="/manifest.webmanifest">
+<script data-goatcounter="https://brickedup.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="BrickedUp">
@@ -269,13 +270,18 @@ function specialArea(sp, c, r) {
   return out.filter(([x, y]) => x >= 0 && x < COLS && y >= 0 && y < ROWS);
 }
 
+/* ---------- analytics (GoatCounter, cookie-free; no-op when blocked or offline) ---------- */
+function track(path, title) {
+  try { if (window.goatcounter && window.goatcounter.count) window.goatcounter.count({ path, title: title || path, event: true }); } catch (e) {}
+}
+
 /* ---------- game flow ---------- */
 function newGame() {
   S = { level: 1, score: 0, moves: 0, cleared: 0, target: 0, colors: 4, grid: [], phase: 'intro' };
   buildLevel(1);
   showOverlay('BrickedUp', null,
     `Tap a group of two or more matching bricks to highlight it, then tap again to smash. Clear <strong>${S.target} bricks</strong> in <strong>${S.moves} swings</strong> to reach level 2.`,
-    'Start level 1', () => { S.phase = 'play'; hideOverlay(); canvas.focus({ preventScroll: true }); });
+    'Start level 1', () => { track('game-start', 'Game started'); S.phase = 'play'; hideOverlay(); canvas.focus({ preventScroll: true }); });
 }
 function buildLevel(L, carried = []) {
   const cfg = levelCfg(L);
@@ -360,7 +366,7 @@ function useHint() {
   for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) { const n = groupAt(c, r).length; if (n > bn) { bn = n; bestP = [c, r]; } }
   if (!bestP) for (let c = 0; c < COLS && !bestP; c++) for (let r = 0; r < ROWS; r++) { const cell = get(c, r); if (cell && cell.sp) { bestP = [c, r]; break; } }
   if (!bestP) return;
-  hintsLeft--; updateHUD();
+  hintsLeft--; updateHUD(); track('hint-used', 'Hint used');
   sel = makeSel(bestP[0], bestP[1]); sfx.tick();
   toast(sel.special ? 'Try this special brick' : 'Biggest group: ' + sel.cells.length + ' bricks');
 }
@@ -494,16 +500,17 @@ function levelComplete() {
   if (S.level + 1 === 3) extras.push('Iron blocks show up from here on.');
   showOverlay(`Level ${S.level} cleared`, '+' + bonus.toLocaleString(),
     `Swing bonus for ${S.moves} unused swing${S.moves === 1 ? '' : 's'}. Next up: clear <strong>${next.target} bricks</strong> in <strong>${next.moves} swings</strong>. ${extras.join(' ')}`,
-    `Start level ${S.level + 1}`, () => { buildLevel(S.level + 1, carried); S.phase = 'play'; hideOverlay(); canvas.focus({ preventScroll: true }); if (carried.length) toast(`+${carried.length} special${carried.length === 1 ? '' : 's'} carried over`); });
+    `Start level ${S.level + 1}`, () => { buildLevel(S.level + 1, carried); track('level-' + S.level, 'Reached level ' + S.level); S.phase = 'play'; hideOverlay(); canvas.focus({ preventScroll: true }); if (carried.length) toast(`+${carried.length} special${carried.length === 1 ? '' : 's'} carried over`); });
 }
 function gameOver(reason) {
   S.phase = 'over';
+  track('game-over-level-' + S.level, 'Game over on level ' + S.level);
   const isBest = S.score > best;
   saveBest(); updateHUD();
   sfx.over();
   showOverlay(reason, S.score.toLocaleString(),
     `You reached <strong>level ${S.level}</strong>${isBest && S.score > 0 ? ' and set a new best score' : ''}. Best so far: <strong>${best.toLocaleString()}</strong>.`,
-    'Play again', () => { newGame(); S.phase = 'play'; hideOverlay(); });
+    'Play again', () => { newGame(); track('game-start', 'Game started'); S.phase = 'play'; hideOverlay(); });
 }
 function saveBest() { if (S.score > best) { best = S.score; try { localStorage.setItem('brickabrack-best', String(best)); } catch (e) {} } }
 
@@ -650,6 +657,7 @@ $('soundBtn').addEventListener('click', () => {
   muted = !muted; $('soundBtn').textContent = muted ? 'Sound off' : 'Sound on';
   $('soundBtn').setAttribute('aria-pressed', String(!muted));
   try { localStorage.setItem('brickabrack-muted', muted ? '1' : '0'); } catch (e) {}
+  track(muted ? 'sound-off' : 'sound-on', muted ? 'Sound turned off' : 'Sound turned on');
   if (!muted) { audioInit(); sfx.level(); }
 });
 try { if (localStorage.getItem('brickabrack-muted') === '1') { muted = true; $('soundBtn').textContent = 'Sound off'; $('soundBtn').setAttribute('aria-pressed', 'false'); } } catch (e) {}
