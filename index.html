@@ -238,7 +238,7 @@ h3{margin:4px 0 0;font:400 13px/1 var(--display);letter-spacing:.06em;color:var(
   <ul class="help">
     <li><b>Smash.</b> Tap a group of two or more touching bricks of the same color to highlight it, then tap it again to smash it. Tapping anywhere else moves the highlight. Specials go off with a single tap.</li>
     <li><b>Chains.</b> When a special's blast reaches another special, that one goes off too, and so on down the line. Every special in the chain adds to a multiplier, so three specials in a row score each brick they clear at ×3.</li>
-    <li><b>Score.</b> Bigger groups score far more, because points grow with the square of the group. Empty a whole column in one swing for a <b>column clear</b> bonus of 250 × level per column.</li>
+    <li><b>Score.</b> Bigger groups score far more, because points grow with the square of the group. Empty a whole column or row in one swing, Drills and Sweepers included, for a <b>line clear</b> bonus of 250 × level per line, doubled when you clear more than one at once.</li>
     <li><b>Levels.</b> Each level gives you a set number of swings to clear a brick target. Every swing you don't use is worth 25 × level. A new color joins at levels 4 and 7, and iron blocks show up from level 3.</li>
     <li><b>Head start.</b> Smash past the target and some of the extra bricks count toward the next level: half after level 1, a little less each level (never below 10%), up to a quarter of the next target. Save a big group for your last swing.</li>
     <li><b>Carry-over.</b> Up to 3 special bricks you haven't used come back on the next level in random spots.</li>
@@ -425,14 +425,21 @@ function shuffle(silent) {
   if (!silent) { toast('Reshuffled'); sfx.zap(); }
 }
 
-function columnBonus(c, r) {
-  let cols = 0;
+// Line clear bonus: 250 × level for each column or row left completely empty by one swing
+// (Drills and Sweepers included), doubled when more than one line empties at once.
+function lineBonus(c, r) {
+  let cols = 0, rows = 0;
   for (let x = 0; x < COLS; x++) if (S.grid[x].every(cell => !cell)) cols++;
-  if (!cols) return 0;
-  const bonus = cols * 250 * S.level * (cols > 1 ? 2 : 1);
+  for (let y = 0; y < ROWS; y++) if (S.grid.every(col => !col[y])) rows++;
+  const lines = cols + rows;
+  if (!lines) return 0;
+  const bonus = lines * 250 * S.level * (lines > 1 ? 2 : 1);
   S.score += bonus;
-  popups.push({ x: (c + 0.5) * cw, y: (r + 0.5) * ch + ch * 0.9, text: (cols > 1 ? cols + ' columns ' : 'Column clear ') + '+' + bonus, life: 1.6, big: true });
-  toast(cols > 1 ? cols + ' columns cleared!' : 'Column clear!');
+  const what = !rows ? (cols > 1 ? cols + ' columns' : 'Column clear')
+    : !cols ? (rows > 1 ? rows + ' rows' : 'Row clear')
+    : lines + ' lines';
+  popups.push({ x: (c + 0.5) * cw, y: (r + 0.5) * ch + ch * 0.9, text: what + ' +' + bonus, life: 1.6, big: true });
+  toast(lines > 1 ? what + ' cleared!' : what + '!');
   sfx.level();
   return bonus;
 }
@@ -497,7 +504,7 @@ function smash(c, r) {
       const pts = n * 20 * chain;
       S.score += pts;
       popup(c, r, '+' + pts + (chain > 1 ? '  ×' + chain : ''), true);
-      columnBonus(c, r);
+      lineBonus(c, r);
       S.smashes = (S.smashes || 0) + 1;
       collapse(); updateHUD();
     }, (steps.length - 1) * CHAIN_STEP_MS + 120);
@@ -527,7 +534,7 @@ function smash(c, r) {
   }
   if (ironGone.length) { removeCells(ironGone, false); pts += ironGone.length * 60; }
   S.score += pts;
-  columnBonus(c, r);
+  lineBonus(c, r);
   S.smashes = (S.smashes || 0) + 1;
   let made = null;
   if (n >= 12) made = 'prism'; else if (n >= 9) made = 'bomb'; else if (n >= 6) made = Math.random() < 0.5 ? 'row' : 'col';
