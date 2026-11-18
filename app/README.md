@@ -33,4 +33,4 @@ It fails loudly if any of those parts of `index.html` change shape, so a future 
 - **Privacy manifest:** `ios/App/App/PrivacyInfo.xcprivacy` declares no tracking and no collected data.
 - The website's "reload when a new build is live" check only runs on `http(s)`, so it never fires inside the app.
 
-App ID: `studio.slamdunk.brickedup`. The Xcode project uses Swift Package Manager, so there's no CocoaPods step.
+App ID: `com.itschefff.brickedup`. The Xcode project uses Swift Package Manager, so there's no CocoaPods step.
