@@ -6,7 +6,7 @@
 <title>BrickedUp</title>
 <meta name="description" content="Smash matching bricks, chain big groups and clear the yard. A free brick-smashing puzzle game.">
 <meta name="theme-color" content="#161d2b">
-<meta name="build" content="2026-11-15.2">
+<meta name="build" content="2026-11-18.1">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" href="/icons/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
@@ -61,8 +61,11 @@ body{
   font-size:15px;
   padding-left:max(16px, env(safe-area-inset-left, 0px));
   padding-right:max(16px, env(safe-area-inset-right, 0px));
-  padding-block:14px 28px;
+  padding-top:max(14px, env(safe-area-inset-top, 0px));
+  padding-bottom:max(28px, calc(env(safe-area-inset-bottom, 0px) + 12px));
 }
+/* iOS app build (Capacitor): no text selection, no long-press callouts, no tap flash. */
+html.native,html.native body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
 .wrap{max-width:620px;margin:0 auto;display:grid;gap:12px}
 header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .logo{display:flex;align-items:center;gap:10px;margin:0;font-family:var(--display);font-weight:400;font-size:clamp(22px,6vw,32px);letter-spacing:.02em;line-height:1}
@@ -128,6 +131,9 @@ h3{margin:4px 0 0;font:400 13px/1 var(--display);letter-spacing:.06em;color:var(
 .howto[open] summary::after{content:'\2212'}
 .howto summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .howto-body{display:flex;flex-direction:column;gap:10px;padding:0 14px 14px}
+.foot{margin:2px 0 0;text-align:center;font-size:13px}
+.foot a{color:var(--muted);text-decoration:none;padding:6px 10px}
+.foot a:hover,.foot a:focus-visible{color:var(--ink);text-decoration:underline}
 @media (max-width:420px){.legend{grid-template-columns:1fr}.hud{gap:6px}.stat{padding:7px 8px}}
 @media (max-height:520px){.card{padding:14px;gap:8px}.card h2{font-size:20px}.card .big{font-size:26px}.card p{font-size:14px;line-height:1.4}.card button{padding:10px 14px}}
 /* Chain pop: counts up in the middle of the board as each special in a chain fires. */
@@ -246,6 +252,7 @@ h3{margin:4px 0 0;font:400 13px/1 var(--display);letter-spacing:.06em;color:var(
   </ul>
     </div>
   </details>
+  <p class="foot"><a href="/privacy.html">Privacy</a></p>
 </div>
 
 <script>
@@ -264,6 +271,9 @@ const SPECIAL_KINDS = ['row','col','bomb','prism'];
 const reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const $ = id => document.getElementById(id);
+/* True inside the iOS app (Capacitor); false on the website. */
+const NATIVE = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+if (NATIVE) document.documentElement.classList.add('native');
 const canvas = $('board'), ctx = canvas.getContext('2d');
 const well = $('well');
 let cw = 48, ch = 38, dpr = 1;
@@ -816,15 +826,21 @@ function noise(dur, vol, freq) {
   src.buffer = buf; f.type = 'lowpass'; f.frequency.value = freq; g.gain.value = vol;
   src.connect(f).connect(g).connect(master); src.start(t);
 }
+/* ---------- haptics (iOS app only; the website has none) ---------- */
+const Haptics = NATIVE && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics;
+function buzz(style, note) {
+  if (!Haptics) return;
+  try { (note ? Haptics.notification({ type: note }) : Haptics.impact({ style })).catch(() => {}); } catch (e) {}
+}
 const sfx = {
-  pop(n, k) { noise(0.14, 0.22, 1400 + n * 60); tone(260 + (k || 0) * 30 + Math.min(n, 14) * 35, 0.14, 'triangle', 0.1, 180); },
-  tick() { tone(720, 0.06, 'triangle', 0.07, 120); },
-  thud() { tone(120, 0.12, 'square', 0.05, -50); },
-  boom() { noise(0.6, 0.45, 500); tone(90, 0.45, 'sine', 0.3, -55); },
-  zap() { tone(1100, 0.28, 'sawtooth', 0.05, -800); noise(0.2, 0.1, 3000); },
-  prism() { [660, 880, 1320, 1760].forEach((f, i) => tone(f, 0.25, 'sine', 0.07, 0, i * 0.05)); },
-  level() { [523, 659, 784, 1046].forEach((f, i) => tone(f, 0.22, 'triangle', 0.1, 0, i * 0.11)); },
-  over() { [392, 330, 262, 196].forEach((f, i) => tone(f, 0.3, 'triangle', 0.09, 0, i * 0.15)); },
+  pop(n, k) { buzz(n >= 9 ? 'HEAVY' : n >= 5 ? 'MEDIUM' : 'LIGHT'); noise(0.14, 0.22, 1400 + n * 60); tone(260 + (k || 0) * 30 + Math.min(n, 14) * 35, 0.14, 'triangle', 0.1, 180); },
+  tick() { buzz('LIGHT'); tone(720, 0.06, 'triangle', 0.07, 120); },
+  thud() { buzz('LIGHT'); tone(120, 0.12, 'square', 0.05, -50); },
+  boom() { buzz('HEAVY'); noise(0.6, 0.45, 500); tone(90, 0.45, 'sine', 0.3, -55); },
+  zap() { buzz('MEDIUM'); tone(1100, 0.28, 'sawtooth', 0.05, -800); noise(0.2, 0.1, 3000); },
+  prism() { buzz('HEAVY'); [660, 880, 1320, 1760].forEach((f, i) => tone(f, 0.25, 'sine', 0.07, 0, i * 0.05)); },
+  level() { buzz(null, 'SUCCESS'); [523, 659, 784, 1046].forEach((f, i) => tone(f, 0.22, 'triangle', 0.1, 0, i * 0.11)); },
+  over() { buzz(null, 'WARNING'); [392, 330, 262, 196].forEach((f, i) => tone(f, 0.3, 'triangle', 0.09, 0, i * 0.15)); },
 };
 $('soundBtn').addEventListener('click', () => {
   muted = !muted; $('soundBtn').textContent = muted ? 'Sound off' : 'Sound on';

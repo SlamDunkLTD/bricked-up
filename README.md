@@ -9,3 +9,7 @@ The whole game is a single self-contained `index.html`, served by GitHub Pages f
 ## Shipping changes
 
 Bump `<meta name="build" content="...">` in `index.html` whenever you change the game, for example `2026-11-15.2`. Open copies of the game, including home-screen installs on iPhone, check that stamp when they launch or come back to the foreground, and reload onto the new version when it changes. They never reload in the middle of a game.
+
+## iPhone app
+
+`app/` wraps the same `index.html` as an iOS app with Capacitor, for the App Store. See [`app/README.md`](app/README.md), and [`app/store/CHECKLIST.md`](app/store/CHECKLIST.md) for the release steps. The privacy policy for both the site and the app is `privacy.html`.

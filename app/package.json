@@ -1,0 +1,23 @@
+{
+  "name": "brickedup-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "BrickedUp for iOS, wrapping the web game with Capacitor.",
+  "scripts": {
+    "build": "node scripts/build-www.mjs",
+    "sync": "node scripts/build-www.mjs && cap sync ios",
+    "open": "cap open ios",
+    "assets": "capacitor-assets generate --ios"
+  },
+  "dependencies": {
+    "@capacitor/core": "^8.6.2",
+    "@capacitor/ios": "^8.6.2",
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/status-bar": "^8.0.4",
+    "@capacitor/splash-screen": "^8.0.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.6.2",
+    "@capacitor/assets": "^4.0.0"
+  }
+}

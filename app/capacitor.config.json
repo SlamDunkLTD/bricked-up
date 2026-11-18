@@ -1,0 +1,27 @@
+{
+  "appId": "studio.slamdunk.brickedup",
+  "appName": "BrickedUp",
+  "webDir": "www",
+  "backgroundColor": "#161d2b",
+  "loggingBehavior": "debug",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#161d2b",
+    "scrollEnabled": true,
+    "allowsLinkPreview": false,
+    "limitsNavigationsToAppBoundDomains": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 600,
+      "launchAutoHide": true,
+      "launchFadeOutDuration": 250,
+      "backgroundColor": "#161d2b",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "overlaysWebView": true
+    }
+  }
+}
