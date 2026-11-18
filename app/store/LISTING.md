@@ -17,7 +17,7 @@ Copy and paste each field into App Store Connect. The character limits are Apple
 | Age rating | Answer **None** or **No** to every question. The result is **4+**. |
 | Price | Free |
 | Privacy Policy URL | `https://brickedup.slamdunk.studio/privacy.html` |
-| Support URL | `https://brickedup.slamdunk.studio/privacy.html` (it has the contact email at the bottom) |
+| Support URL | `https://brickedup.slamdunk.studio/privacy.html` (contact email: joseph@itschefff.com) |
 | Marketing URL (optional) | `https://brickedup.slamdunk.studio/` |
 | Copyright | `2026 Slam Dunk` (change to your legal or trading name) |
 
