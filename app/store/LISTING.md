@@ -1,4 +1,4 @@
-# BrickedUp App Store listing
+# BrickedUp: Smash & Collapse App Store listing
 
 Copy and paste each field into App Store Connect. The character limits are Apple's, and every field below fits inside them.
 
@@ -6,8 +6,8 @@ Copy and paste each field into App Store Connect. The character limits are Apple
 
 | Field | Value |
 |---|---|
-| Name (30 max) | `BrickedUp` |
-| Backup names, if "BrickedUp" is taken | `BrickedUp: Brick Smash` or `BrickedUp Puzzle` |
+| Name (30 max) | `BrickedUp: Smash & Collapse` (already set in App Store Connect) |
+| Name under the icon on the iPhone home screen | `BrickedUp` (set in the Xcode project, so it isn't cut off) |
 | Subtitle (30 max) | `Smash bricks. Chain the blast.` |
 | Bundle ID | `com.itschefff.brickedup` |
 | SKU (private, any text) | `brickedup-ios-1` |
@@ -95,7 +95,7 @@ They are 1320 × 2868, which is the size Apple asks for. Apple scales them down 
 - Notes:
 
 ```
-BrickedUp is an original puzzle game built for iPhone. All game code, art and fonts are bundled in the app, and it runs fully offline with no account, ads, analytics or network access.
+BrickedUp: Smash & Collapse is an original puzzle game built for iPhone. Its home-screen name is shortened to "BrickedUp". All game code, art and fonts are bundled in the app, and it runs fully offline with no account, ads, analytics or network access.
 
 Native features: haptic feedback (UIKit feedback generators) on every smash, special brick and level-up; an ambient audio session so sound effects follow the Ring/Silent switch and mix with the player's music; portrait-locked layout that respects the notch, Dynamic Island and home indicator safe areas; native launch screen and status bar styling.
 
