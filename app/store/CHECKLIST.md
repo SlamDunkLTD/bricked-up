@@ -1,4 +1,4 @@
-# Getting BrickedUp onto the App Store: your steps
+# Getting BrickedUp: Smash & Collapse onto the App Store: your steps
 
 These are the steps only you can do, on your Mac and in your Apple accounts. Everything else (the Xcode project, icon, launch screen, privacy policy, store text and screenshots) is already in this repo. Do the parts in order. The first time through takes an afternoon, plus Apple's review, which is usually one to two days.
 
@@ -52,7 +52,7 @@ You'll need: a Mac, your iPhone and its cable, and your Apple Developer account 
 19. Check **Business** (or "Agreements, Tax, and Banking"): the **Free Apps** agreement should be active. If anything there says "Action needed", do that first.
 20. Click **Apps**, then the blue **+** button, then **New App**. Fill in:
     - Platforms: **iOS**
-    - Name: **BrickedUp** (if it's taken, use a backup name from `LISTING.md`)
+    - Name: **BrickedUp: Smash & Collapse** (you've already set this). On the home screen the app still shows as "BrickedUp".
     - Primary language: **English (U.K.)** or **English (U.S.)**
     - Bundle ID: pick `com.itschefff.brickedup` from the list (it appears once it is registered in your Developer account, or after step 13)
     - SKU: `brickedup-ios-1`
