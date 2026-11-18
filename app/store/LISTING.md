@@ -9,7 +9,7 @@ Copy and paste each field into App Store Connect. The character limits are Apple
 | Name (30 max) | `BrickedUp` |
 | Backup names, if "BrickedUp" is taken | `BrickedUp: Brick Smash` or `BrickedUp Puzzle` |
 | Subtitle (30 max) | `Smash bricks. Chain the blast.` |
-| Bundle ID | `studio.slamdunk.brickedup` |
+| Bundle ID | `com.itschefff.brickedup` |
 | SKU (private, any text) | `brickedup-ios-1` |
 | Primary category | Games, then the subcategory **Puzzle** |
 | Secondary category | Games, then the subcategory **Casual** |

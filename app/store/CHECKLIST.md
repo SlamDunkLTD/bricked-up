@@ -31,7 +31,7 @@ You'll need: a Mac, your iPhone and its cable, and your Apple Developer account 
 9. In Xcode's left sidebar, click the blue **App** icon at the very top. In the middle, under **TARGETS**, click **App**, then the **Signing & Capabilities** tab.
 10. Tick **Automatically manage signing**.
 11. Next to **Team**, pick your developer team.
-12. Check **Bundle Identifier** says `studio.slamdunk.brickedup`. Leave it as it is unless Xcode says it's taken. If you do change it, also change `appId` in `app/capacitor.config.json` to match, and use the new one in App Store Connect.
+12. Check **Bundle Identifier** says `com.itschefff.brickedup`, the ID you registered in your Apple Developer account. If you ever change it, also change `appId` in `app/capacitor.config.json` to match, and use the new one in App Store Connect.
 13. Any red error under Signing should disappear within a few seconds. If it says the bundle ID isn't registered, click **Try Again** or **Register**.
 
 ## Part 4. Try it on your iPhone
@@ -54,7 +54,7 @@ You'll need: a Mac, your iPhone and its cable, and your Apple Developer account 
     - Platforms: **iOS**
     - Name: **BrickedUp** (if it's taken, use a backup name from `LISTING.md`)
     - Primary language: **English (U.K.)** or **English (U.S.)**
-    - Bundle ID: pick `studio.slamdunk.brickedup` from the list (it appears after step 13)
+    - Bundle ID: pick `com.itschefff.brickedup` from the list (it appears once it is registered in your Developer account, or after step 13)
     - SKU: `brickedup-ios-1`
     - User access: **Full Access**
 21. Fill in each page using `app/store/LISTING.md`, which has every field ready to paste:
