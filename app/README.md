@@ -30,6 +30,7 @@ It fails loudly if any of those parts of `index.html` change shape, so a future 
 - **Safe areas:** the web view runs edge to edge (`contentInset: never`) and the page pads itself with `env(safe-area-inset-*)`.
 - **iPhone only, portrait only** (`TARGETED_DEVICE_FAMILY = 1`, `Info.plist`). It still runs on iPads in iPhone mode.
 - **Launch screen and icon** are rendered from `resources/icon.svg` and `resources/splash.svg` into `ios/App/App/Assets.xcassets`.
+- **Game Center:** `ios/App/App/GameCenterPlugin.swift` is a small plugin for this app only, registered in `MainViewController.swift` and called from `index.html` as `Capacitor.Plugins.GameCenter` (`signIn`, `submitScore`, `showLeaderboard`). Leaderboard IDs are in `LEADERBOARDS` in `index.html`, one per play style (`original` → `brickedup.original`). The Game Center entitlement is in `ios/App/App/App.entitlements`. On the website the plugin doesn't exist, so the Leaderboard button stays hidden and nothing is sent.
 - **Privacy manifest:** `ios/App/App/PrivacyInfo.xcprivacy` declares no tracking and no collected data.
 - The website's "reload when a new build is live" check only runs on `http(s)`, so it never fires inside the app.
 
