@@ -76,6 +76,12 @@ brick,smash,collapse,puzzle,blocks,tap,chain,blast,offline,casual,colors,match,b
 
 ### What's New (only for later updates; leave empty on 1.0)
 
+Version 1.1:
+
+```
+Game Center leaderboard! Your best score now goes on the Original leaderboard, so you can see how you stack up against friends and everyone else. Tap Leaderboard on the start or game over screen to check your rank.
+```
+
 ### Screenshots
 
 Upload the five PNGs in `app/store/screenshots/` (also in the project files under `brickedup/app-store/screenshots/`) into the **iPhone 6.9" Display** box, in this order:

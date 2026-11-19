@@ -6,7 +6,7 @@
 <title>BrickedUp</title>
 <meta name="description" content="Smash matching bricks, chain big groups and clear the yard. A free brick-smashing puzzle game.">
 <meta name="theme-color" content="#161d2b">
-<meta name="build" content="2026-11-18.1">
+<meta name="build" content="2026-11-19.1">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" href="/icons/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/icons/favicon-32.png" type="image/png" sizes="32x32">
@@ -114,6 +114,8 @@ canvas#board{display:block;touch-action:manipulation;cursor:pointer}
 .card .big{font:400 34px/1 var(--display);color:var(--ink);font-variant-numeric:tabular-nums}
 .card button{background:var(--accent);color:#1b1406;border-color:var(--accent);font-weight:700;padding:12px 16px;font-size:15px}
 .card button:hover{background:#ffc66e}
+.card button.ghost{background:transparent;color:var(--ink);border-color:var(--line);font-weight:600}
+.card button.ghost:hover{background:transparent;border-color:var(--muted)}
 .toast{position:absolute;z-index:40;left:50%;top:50%;transform:translate(-50%,-50%) scale(.85);opacity:0;pointer-events:none;background:var(--accent);color:#1b1406;font:400 15px/1.25 var(--display);padding:10px 14px;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.45);transition:opacity .2s, transform .2s;width:max-content;max-width:calc(100% - 32px);text-align:center}
 .toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
 .legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 14px}
@@ -224,6 +226,7 @@ h3{margin:4px 0 0;font:400 13px/1 var(--display);letter-spacing:.06em;color:var(
           <div class="big" id="oBig" hidden></div>
           <p id="oText"></p>
           <button id="oBtn" type="button">Start</button>
+          <button id="lbBtn" class="ghost" type="button" hidden>Leaderboard</button>
         </div>
       </div>
     </div>
@@ -690,6 +693,7 @@ function gameOver(reason) {
   track('game-over-level-' + S.level, 'Game over on level ' + S.level);
   const isBest = S.score > best;
   saveBest(); updateHUD();
+  gcSubmit(S.score);
   sfx.over();
   showOverlay(reason, S.score.toLocaleString(),
     `You reached <strong>level ${S.level}</strong>${isBest && S.score > 0 ? ' and set a new best score' : ''}. Best so far: <strong>${best.toLocaleString()}</strong>.`,
@@ -831,6 +835,34 @@ const Haptics = NATIVE && window.Capacitor.Plugins && window.Capacitor.Plugins.H
 function buzz(style, note) {
   if (!Haptics) return;
   try { (note ? Haptics.notification({ type: note }) : Haptics.impact({ style })).catch(() => {}); } catch (e) {}
+}
+/* ---------- Game Center leaderboards (iOS app only; the website has none) ----------
+   Each play style gets its own leaderboard. Today there is one style, "Original". To add a style, add its
+   leaderboard ID here (and create that leaderboard in App Store Connect), then set MODE when that style starts. */
+const LEADERBOARDS = { original: 'brickedup.original' };
+let MODE = 'original';
+const GameCenter = NATIVE && window.Capacitor.Plugins && window.Capacitor.Plugins.GameCenter;
+let gcReady = false;
+function gcSubmit(score) {
+  if (!GameCenter || !gcReady || !(score > 0)) return;
+  try { GameCenter.submitScore({ leaderboardId: LEADERBOARDS[MODE], score: Math.floor(score) }).catch(() => {}); } catch (e) {}
+}
+if (GameCenter) {
+  $('lbBtn').hidden = false;
+  $('lbBtn').addEventListener('click', () => {
+    try {
+      GameCenter.showLeaderboard({ leaderboardId: LEADERBOARDS[MODE] })
+        .catch(() => {
+          const b = $('lbBtn'); b.textContent = 'Sign in to Game Center in Settings';
+          setTimeout(() => { b.textContent = 'Leaderboard'; }, 2500);
+        });
+    } catch (e) {}
+  });
+  // Sign in quietly at launch (iOS shows its own welcome banner). Once signed in, send the saved best score,
+  // so scores from games played offline or before the leaderboard existed still count. Game Center keeps the highest.
+  try {
+    GameCenter.signIn().then(r => { gcReady = !!(r && r.authenticated); gcSubmit(best); }).catch(() => {});
+  } catch (e) {}
 }
 const sfx = {
   pop(n, k) { buzz(n >= 9 ? 'HEAVY' : n >= 5 ? 'MEDIUM' : 'LIGHT'); noise(0.14, 0.22, 1400 + n * 60); tone(260 + (k || 0) * 30 + Math.min(n, 14) * 35, 0.14, 'triangle', 0.1, 180); },

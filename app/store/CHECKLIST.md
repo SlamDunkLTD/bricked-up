@@ -81,6 +81,42 @@ You'll need: a Mac, your iPhone and its cable, and your Apple Developer account 
 
 ---
 
+## Version 1.1: Game Center leaderboard
+
+The code is done: the app signs players in to Game Center at launch, sends their score to the **Original** leaderboard at every game over, and has a **Leaderboard** button on the start and game over screens that opens Apple's leaderboard screen. (The website is unchanged and shows no button.) These are the steps only you can do. Do the App Store Connect part first, because the app can only post scores to a leaderboard that exists there.
+
+**A. Create the leaderboard in App Store Connect**
+
+1. In App Store Connect, open **BrickedUp: Smash & Collapse** and find **Game Center** in the left sidebar (under **Services** or **Features**, depending on the layout Apple shows you). If it asks, choose to use Game Center for this app (not a group).
+2. Next to **Leaderboards**, click **+** and choose **Classic Leaderboard**. Fill in:
+   - Reference Name: **Original**
+   - Leaderboard ID: **`brickedup.original`** (exactly this; the app uses it, and it can never be changed or reused)
+   - Score Format Type: **Integer**
+   - Score Submission Type: **Best Score**
+   - Sort Order: **High to Low**
+   - Score Range: leave empty
+3. Under **Leaderboard Localization**, click **+**, choose your language, and set Display Name: **Original**, Score Format: **Integer**. Leave the image empty (optional) and click **Save**.
+
+Later play styles each get their own leaderboard the same way (for example ID `brickedup.zen`, name **Zen**). Claude adds the matching line to the game when the style is built.
+
+**B. Build and try it on your iPhone**
+
+4. Get the latest code (GitHub Desktop: **Fetch origin**, then **Pull** on `main`, or switch to the `claude/project-thread-v3zj1l` branch to try it before merging).
+5. In Terminal, in the `app` folder: `npm run sync`, then `npm run open`.
+6. In Xcode, **TARGETS > App > Signing & Capabilities** should now list **Game Center**. If it doesn't, click **+ Capability** and double-click **Game Center**. Any signing error should clear on its own; if it doesn't, click **Try Again**.
+7. Run it on your iPhone (Part 4). Make sure you're signed in under **Settings > Game Center**. When the game opens you should see a "Welcome back" banner from Game Center at the top.
+8. Play a quick game (tap **End game** twice to finish early), then tap **Leaderboard**. Your score should appear on **Original**. Builds run from Xcode use Apple's test (sandbox) Game Center, so these test scores never show on the real leaderboard.
+
+**C. Release 1.1**
+
+9. In App Store Connect, on the app page, click **+** next to **iOS App** and create version **1.1**.
+10. On the **1.1** page, scroll to **Game Center**, turn it on, click **+** next to Leaderboards and add **Original**. (The leaderboard goes live with this version, so it has to be added here.)
+11. Paste the **What's New** text from `app/store/LISTING.md`.
+12. In Xcode, check **TARGETS > App > General** shows Version **1.1** and Build **2** (already set in the project), then upload as in Part 6 and submit as in Part 7.
+13. App Privacy can stay at **Data Not Collected**: Apple runs Game Center and the app sends nothing to you. The privacy policy page on the website already mentions Game Center.
+
+---
+
 ## Updating the app later
 
 The App Store version does not update itself when the website changes. To ship a new version:
